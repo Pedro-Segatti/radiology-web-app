@@ -51,7 +51,7 @@ export default function Login() {
 
             await loginWithProvider(authProvider);
 
-            router.push('/test');
+            router.push('/dashboard');
         } catch (err) {
             console.error(err);
             setError('Erro ao realizar login com provedor externo. Tente novamente.');

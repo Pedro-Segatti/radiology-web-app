@@ -11,6 +11,7 @@ import {
 import { auth } from "@/utils/database";
 import { api } from "@/utils/requests";
 import Cookies from "js-cookie";
+import { Loader } from "lucide-react";
 
 export const AuthContext = createContext();
 
@@ -26,12 +27,7 @@ export const AuthProvider = ({ children }) => {
 
                 Cookies.set("token", token, { expires: 1, secure: true });
 
-                setUser({
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName,
-                    photoURL: user.photoURL,
-                });
+                setUser(user);
 
                 api.defaults.headers.Authorization = `Bearer ${token}`;
             } else {
@@ -51,12 +47,7 @@ export const AuthProvider = ({ children }) => {
 
         Cookies.set("token", token, { expires: 1, secure: true });
 
-        setUser({
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-        });
+        setUser(user);
 
         api.defaults.headers.Authorization = `Bearer ${token}`;
         push("/dashboard");
@@ -68,30 +59,32 @@ export const AuthProvider = ({ children }) => {
         const user = providerLogin.user;
         const token = await user.accessToken;
 
-        const combinedUserData = {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-        };
-
         Cookies.set("token", token, { expires: 1, secure: true });
         api.defaults.headers['Authorization'] = `Bearer ${token}`;
 
-        setUser(combinedUserData);
+        setUser(user);
 
-        push("/test");
+        push("/dashboard");
     }
 
     async function logout() {
+        setLoading(true);
         await signOut(auth);
         Cookies.remove("token");
         setUser(null);
         push("/login");
+        setLoading(false);
     }
 
     if (loading) {
-        return "";
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <div className="flex flex-col items-center justify-center h-[70vh]">
+                    <Loader className="w-12 h-12 text-blue-600 animate-spin" />
+                    <p className="mt-4 text-gray-600">Carregando...</p>
+                </div>
+            </div>
+        );
     }
 
     return (

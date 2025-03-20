@@ -3,7 +3,7 @@ import axios, { HttpStatusCode } from "axios";
 export const HttpStatus = HttpStatusCode;
 
 const apiUrl = () => {
-  let url = process.env.NEXT_PUBLIC_BACKEND_URL;
+  let url = process.env.NEXT_PUBLIC_RADIOLOGY_API_URL;
 
   return url;
 };
