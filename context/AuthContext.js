@@ -7,6 +7,9 @@ import {
     signOut,
     signInWithPopup,
     onIdTokenChanged,
+    createUserWithEmailAndPassword,
+    updateProfile,
+    sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth } from "@/utils/database";
 import { api } from "@/utils/requests";
@@ -76,6 +79,31 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }
 
+    const register = async ({ name, email, password }) => {
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            const token = await user.accessToken;
+
+            await updateProfile(user, {
+                displayName: name
+            });
+
+
+            Cookies.set("token", token, { expires: 1, secure: true });
+            api.defaults.headers['Authorization'] = `Bearer ${token}`;
+            setUser(user);
+        } catch (error) {
+            console.error("Erro ao registrar usuário:", error);
+            throw error;
+        }
+    };
+
+    const resetPassword = async (email) => {
+        await sendPasswordResetEmail(auth, email);
+        return true;
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50">
@@ -88,7 +116,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated: !!user, user, login, loginWithProvider, logout, loading, setLoading }}>
+        <AuthContext.Provider value={{ isAuthenticated: !!user, user, login, register, resetPassword, loginWithProvider, logout, loading, setLoading }}>
             {children}
         </AuthContext.Provider>
     );

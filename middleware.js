@@ -19,7 +19,7 @@ export async function middleware(req) {
     }
 
     if (token && nextUrl.pathname === '/login') {
-      return NextResponse.redirect(new URL('/home', req.url));
+      return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
     return NextResponse.next();
