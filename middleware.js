@@ -7,9 +7,10 @@ export async function middleware(req) {
   const { nextUrl } = req;
   const isPublicRoute = PUBLIC_ROUTES.includes(nextUrl.pathname);
 
-  const token = cookies().get("token")?.value;
-
-  try {    
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    
     if (isPublicRoute) {
       return NextResponse.next();
     }

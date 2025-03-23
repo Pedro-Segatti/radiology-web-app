@@ -61,38 +61,41 @@ export default function Dashboard() {
       const analysisRef = collection(firestore, "analysis");
       const q = query(analysisRef, where("user_id", "==", user.uid));
       const querySnapshot = await getDocs(q);
-      
+
       const now = new Date();
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(now.getDate() - 7);
-      
+
       let totalAnalyses = 0;
       let thisWeekAnalyses = 0;
       let totalProcessingTime = 0;
       let processedAnalyses = 0;
       let latestDate = null;
-      
+
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         totalAnalyses++;
-        
+
         // Count analyses from the last 7 days
         if (data.created_at && new Date(data.created_at) >= oneWeekAgo) {
           thisWeekAnalyses++;
         }
-        
-        // Calculate average processing time if available
-        if (data.processing_time) {
-          totalProcessingTime += data.processing_time;
+
+        const processingTime = data.finished_at
+          ? ((new Date(data.finished_at) - new Date(data.created_at)) / 1000).toFixed(1)
+          : null;
+
+        if (processingTime) {          
+          totalProcessingTime += parseFloat(processingTime);
           processedAnalyses++;
         }
-        
+
         // Track the latest analysis date
         if (data.created_at && (!latestDate || new Date(data.created_at) > latestDate)) {
           latestDate = new Date(data.created_at);
         }
       });
-      
+
       setStats({
         totalAnalyses,
         thisWeekAnalyses,
@@ -174,15 +177,15 @@ export default function Dashboard() {
 
     try {
       const startTime = Date.now();
-      
+
       const data = {
         image: selectedImage
       };
 
       await apiPost("/analysis", data);
-      
+
       setTimeout(() => fetchStats(), 1000);
-      
+
       showNotification('success', 'Imagem enviada para análise!');
       setSelectedImage(null);
     } catch (error) {
@@ -212,9 +215,8 @@ export default function Dashboard() {
 
       {/* Notification component */}
       {notification && (
-        <div className={`fixed top-20 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 max-w-md transform transition-transform duration-300 ease-in-out ${
-          notification.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-        }`}>
+        <div className={`fixed top-20 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 max-w-md transform transition-transform duration-300 ease-in-out ${notification.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+          }`}>
           {notification.type === 'error' ? (
             <AlertCircle className="h-5 w-5 flex-shrink-0" />
           ) : (
@@ -243,13 +245,12 @@ export default function Dashboard() {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`mt-2 flex justify-center rounded-lg border-2 border-dashed px-6 py-8 h-72 overflow-hidden transition-all duration-300 cursor-pointer ${
-                  isDragging
-                    ? 'bg-blue-50 border-blue-500'
-                    : selectedImage
-                      ? 'border-green-400 bg-green-50'
-                      : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
-                }`}
+                className={`mt-2 flex justify-center rounded-lg border-2 border-dashed px-6 py-8 h-72 overflow-hidden transition-all duration-300 cursor-pointer ${isDragging
+                  ? 'bg-blue-50 border-blue-500'
+                  : selectedImage
+                    ? 'border-green-400 bg-green-50'
+                    : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+                  }`}
               >
                 <div className="text-center flex flex-col items-center justify-center w-full">
                   {selectedImage ? (
@@ -355,7 +356,7 @@ export default function Dashboard() {
                 />
                 <h2 className="mt-4 text-xl font-semibold text-gray-800">{user.displayName}</h2>
                 <p className="text-gray-700">{user.email}</p>
-                
+
                 {/* Stats Cards */}
                 <div className="mt-6 w-full space-y-4">
                   <div className="bg-blue-50 p-4 rounded-lg">
@@ -388,7 +389,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="mt-6 pt-6 border-t border-gray-200">
+              {/* <div className="mt-6 pt-6 border-t border-gray-200">
                 <Link href="/dashboard/settings" className="flex items-center justify-center w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-md transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -396,7 +397,7 @@ export default function Dashboard() {
                   </svg>
                   Configurações
                 </Link>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

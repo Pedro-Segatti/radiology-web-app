@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -7,6 +7,7 @@ import ModalImageSection from './modalImageSection';
 
 const AnalysisCard = ({ analysis }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const modalRef = useRef(null);
 
   const timeAgo = formatDistanceToNow(new Date(analysis.created_at), {
     addSuffix: true,
@@ -53,6 +54,23 @@ const AnalysisCard = ({ analysis }) => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  // Handle clicks outside the modal
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        closeModal();
+      }
+    };
+
+    if (isModalOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isModalOpen]);
+
   return (
     <>
       <div className="flex-shrink-0">
@@ -67,6 +85,7 @@ const AnalysisCard = ({ analysis }) => {
               priority={false}
               quality={35}
               fill
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 272px"
               className="object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
@@ -96,7 +115,10 @@ const AnalysisCard = ({ analysis }) => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
+          <div 
+            ref={modalRef}
+            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto"
+          >
             <div className="flex justify-between items-center p-4 border-b">
               <h2 className="text-xl font-semibold capitalize text-gray-700">{getDecision(analysis.decision)}</h2>
               <button
@@ -108,8 +130,6 @@ const AnalysisCard = ({ analysis }) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-
-
               <ModalImageSection analysis={analysis} />
 
               {/* Details section */}
@@ -199,4 +219,3 @@ const AnalysisList = ({ analyses }) => {
 };
 
 export default AnalysisList;
-
