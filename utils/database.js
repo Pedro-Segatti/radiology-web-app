@@ -18,6 +18,8 @@ export const auth = getAuth(app);
 
 export function getFirebaseAuthErrorMessage(error) {  
   switch (error.code) {
+    case 'auth/weak-password':
+      return 'A senha é muito fraca.';
     case 'auth/invalid-email':
       return 'O e-mail fornecido é inválido.';
     case 'auth/user-disabled':

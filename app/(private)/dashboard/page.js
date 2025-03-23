@@ -181,14 +181,12 @@ export default function Dashboard() {
 
       await apiPost("/analysis", data);
       
-      // Refresh statistics after successful analysis
       setTimeout(() => fetchStats(), 1000);
       
-      showNotification('success', 'Imagem analisada com sucesso!');
+      showNotification('success', 'Imagem enviada para análise!');
       setSelectedImage(null);
     } catch (error) {
-      console.error('Erro ao analisar imagem:', error);
-      showNotification('error', error.message || 'Erro ao analisar a imagem. Tente novamente.');
+      showNotification('Não foi possível analisar a imagem. Tente novamente mais tarde.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -327,7 +325,7 @@ export default function Dashboard() {
                     {isAnalyzing ? (
                       <>
                         <Loader className="animate-spin h-6 w-6" />
-                        <span>Analisando...</span>
+                        <span>Enviando para Análise</span>
                       </>
                     ) : (
                       <>
